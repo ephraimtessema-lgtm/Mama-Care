@@ -6,9 +6,11 @@ import {
   loadAiChatMessages,
   saveAiChatMessage,
   deleteAiChatSession,
+  deleteAiChatMessage,
   updateAiChatSession,
   titleFromFirstMessage,
 } from "@/api/aiChatHistory";
+import HoverDeleteButton from "@/components/HoverDeleteButton";
 import { getOrCreateFlowerName } from "@/api/userProfile";
 import { useAuth } from "@/lib/AuthContext";
 import AiChatSidebar, { AiChatMenuToggle } from "@/components/ai/AiChatSidebar";
@@ -62,6 +64,17 @@ export default function AiChat() {
   const [isLoading, setIsLoading] = useState(false);
   const [showEmergency, setShowEmergency] = useState(false);
   const bottomRef = useRef(null);
+
+  async function handleDeleteUserMessage(msg) {
+    if (!msg.id || msg.isWelcome) return;
+    if (!window.confirm("Delete this message from your chat history?")) return;
+    try {
+      await deleteAiChatMessage(user.id, msg.id);
+      setMessages((prev) => prev.filter((m) => m.id !== msg.id));
+    } catch (err) {
+      alert(err?.message || "Could not delete message.");
+    }
+  }
 
   const refreshSessions = useCallback(async () => {
     if (!user?.id) return [];
@@ -362,7 +375,7 @@ export default function AiChat() {
                 )}
               </div>
               <div
-                className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
+                className={`group relative max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
                   msg.role === "assistant"
                     ? msg.is_emergency
                       ? "bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-gray-800 dark:text-gray-100"
@@ -370,6 +383,15 @@ export default function AiChat() {
                     : "bg-rose-500 text-white"
                 }`}
               >
+                {msg.role === "user" && msg.id && !msg.isWelcome && (
+                  <div className="absolute -top-2 left-0">
+                    <HoverDeleteButton
+                      title="Delete message"
+                      className="bg-white/90 dark:bg-gray-900/90 shadow-sm"
+                      onClick={() => handleDeleteUserMessage(msg)}
+                    />
+                  </div>
+                )}
                 {msg.content}
               </div>
             </div>

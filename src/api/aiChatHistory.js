@@ -31,6 +31,17 @@ export async function updateAiChatSession(sessionId, patch) {
   if (error) throw error;
 }
 
+export async function deleteAiChatMessage(userId, messageId) {
+  const { error } = await supabase
+    .from('ai_chat_messages')
+    .delete()
+    .eq('id', messageId)
+    .eq('user_id', userId)
+    .eq('role', 'user');
+
+  if (error) throw error;
+}
+
 export async function deleteAiChatSession(userId, sessionId) {
   const { error } = await supabase
     .from('ai_chat_sessions')

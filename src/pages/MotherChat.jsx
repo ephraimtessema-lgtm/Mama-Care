@@ -5,6 +5,9 @@ import { getOrCreateFlowerName } from "@/api/userProfile";
 import { listRecentPrivatePartners } from "@/api/motherPrivateChat";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Send, MessageCircle, Lock } from "lucide-react";
+import { isAdmin } from "@/lib/roles";
+import { deleteMotherChatMessage, adminSetUserBans } from "@/api/moderation";
+import HoverDeleteButton from "@/components/HoverDeleteButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -16,19 +19,30 @@ const ROOMS = [
   { id: "postpartum", label: "🤱 Postpartum", desc: "After birth" },
 ];
 
-function SenderLabel({ msg, currentUserId, onPrivateChat }) {
+function SenderLabel({ msg, currentUserId, onPrivateChat, admin, onBanUser }) {
   const canDm = msg.sender_id && msg.sender_id !== currentUserId;
 
   if (canDm) {
     return (
-      <button
-        type="button"
-        onClick={() => onPrivateChat(msg.sender_id, msg.sender_name)}
-        className="text-xs font-semibold opacity-90 mb-0.5 underline-offset-2 hover:underline text-left dark:text-rose-200"
-        title="Open private chat"
-      >
-        🌸 {msg.sender_name}
-      </button>
+      <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+        <button
+          type="button"
+          onClick={() => onPrivateChat(msg.sender_id, msg.sender_name)}
+          className="text-xs font-semibold opacity-90 underline-offset-2 hover:underline text-left dark:text-rose-200"
+          title="Open private chat"
+        >
+          🌸 {msg.sender_name}
+        </button>
+        {admin && (
+          <button
+            type="button"
+            className="text-[10px] px-2 py-0.5 rounded-full border border-red-300 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
+            onClick={() => onBanUser(msg.sender_id)}
+          >
+            Ban
+          </button>
+        )}
+      </div>
     );
   }
 
@@ -131,6 +145,44 @@ export default function MotherChat() {
   }
 
   const currentRoom = ROOMS.find((r) => r.id === activeRoom);
+  const admin = isAdmin(user);
+
+  async function handleDeleteMessage(msg) {
+    if (!window.confirm("Delete this message?")) return;
+    try {
+      await deleteMotherChatMessage(msg.id, user.id);
+      setMessages((prev) => prev.filter((m) => m.id !== msg.id));
+    } catch (err) {
+      alert(err?.message || "Could not delete message. Run migration 009 in Supabase.");
+    }
+  }
+
+  async function handleBanUser(targetUserId) {
+    if (!targetUserId || !window.confirm("Ban this user from Mother Chat?")) return;
+    try {
+      await adminSetUserBans(targetUserId, { motherChat: true });
+      alert("User banned from Mother Chat.");
+    } catch (err) {
+      alert(err?.message || "Could not ban user.");
+    }
+  }
+
+  if (user?.banned_from_mother_chat) {
+    return (
+      <div className="min-h-screen bg-rose-50 dark:bg-gray-950 flex items-center justify-center px-4">
+        <div className="max-w-md text-center bg-white dark:bg-gray-900 rounded-2xl border border-rose-100 dark:border-gray-800 p-8">
+          <p className="text-4xl mb-3">💬</p>
+          <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">Mother Chat access paused</h1>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            You cannot send messages in Mother Chat right now. Contact support if you think this is a mistake.
+          </p>
+          <Link to="/">
+            <Button className="rounded-full bg-rose-500 hover:bg-rose-600 text-white">Back home</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[calc(100dvh-3.5rem)] bg-rose-50 dark:bg-gray-950 flex flex-col">
@@ -201,16 +253,27 @@ export default function MotherChat() {
           return (
             <div key={msg.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
               <div
-                className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${
+                className={`group relative max-w-[80%] rounded-2xl px-4 py-2.5 ${
                   mine
                     ? "bg-rose-500 text-white"
                     : "bg-white dark:bg-gray-800 border border-rose-100 dark:border-gray-700 text-gray-800 dark:text-gray-100"
                 }`}
               >
+                {mine && msg.sender_id && (
+                  <div className="absolute -top-2 -right-2">
+                    <HoverDeleteButton
+                      title="Delete message"
+                      className="bg-white/90 dark:bg-gray-900/90 shadow-sm"
+                      onClick={() => handleDeleteMessage(msg)}
+                    />
+                  </div>
+                )}
                 <SenderLabel
                   msg={msg}
                   currentUserId={user.id}
                   onPrivateChat={openPrivateChat}
+                  admin={admin}
+                  onBanUser={handleBanUser}
                 />
                 <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
               </div>

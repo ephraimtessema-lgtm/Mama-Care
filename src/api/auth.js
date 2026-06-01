@@ -13,7 +13,7 @@ export async function mapUser(user) {
   if (!user) return null;
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .select('full_name, role, flower_name, phone, due_date, baby_birth_date, preferences')
+    .select('full_name, role, flower_name, phone, due_date, baby_birth_date, preferences, banned_from_forum, banned_from_mother_chat')
     .eq('id', user.id)
     .maybeSingle();
 
@@ -46,6 +46,8 @@ export async function mapUser(user) {
     baby_birth_date: profile?.baby_birth_date || null,
     preferences: profile?.preferences || null,
     role: profile?.role || 'user',
+    banned_from_forum: Boolean(profile?.banned_from_forum),
+    banned_from_mother_chat: Boolean(profile?.banned_from_mother_chat),
     user_metadata: user.user_metadata,
   };
 }

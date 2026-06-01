@@ -11,6 +11,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, Lock, Send } from 'lucide-react';
+import { deletePrivateMessage } from '@/api/moderation';
+import HoverDeleteButton from '@/components/HoverDeleteButton';
 
 export default function MotherPrivateChat() {
   const { partnerId } = useParams();
@@ -96,6 +98,33 @@ export default function MotherPrivateChat() {
 
   if (!user) return null;
 
+  async function handleDeleteMessage(msg) {
+    if (!window.confirm('Delete this message?')) return;
+    try {
+      await deletePrivateMessage(msg.id, user.id);
+      setMessages((prev) => prev.filter((m) => m.id !== msg.id));
+    } catch (err) {
+      setError(err?.message || 'Could not delete message. Run migration 009 in Supabase.');
+    }
+  }
+
+  if (user.banned_from_mother_chat) {
+    return (
+      <div className="min-h-screen bg-rose-50 dark:bg-gray-950 flex items-center justify-center px-4">
+        <div className="max-w-md text-center bg-white dark:bg-gray-900 rounded-2xl border p-8 dark:border-gray-800">
+          <p className="text-4xl mb-3">🔒</p>
+          <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">Private chat access paused</h1>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            You cannot send private messages right now.
+          </p>
+          <Link to="/mother-chat">
+            <Button className="rounded-full bg-rose-500 hover:bg-rose-600 text-white">Back to Mother Chat</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-[calc(100dvh-3.5rem)] bg-rose-50 dark:bg-gray-950 flex flex-col">
       <div className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 sticky top-14 z-10">
@@ -140,12 +169,21 @@ export default function MotherPrivateChat() {
           return (
             <div key={msg.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
               <div
-                className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
+                className={`group relative max-w-[85%] rounded-2xl px-4 py-2.5 ${
                   mine
                     ? 'bg-rose-500 text-white'
                     : 'bg-white dark:bg-gray-800 border border-rose-100 dark:border-gray-700 text-gray-800 dark:text-gray-100'
                 }`}
               >
+                {mine && (
+                  <div className="absolute -top-2 -right-2">
+                    <HoverDeleteButton
+                      title="Delete message"
+                      className="bg-white/90 dark:bg-gray-900/90 shadow-sm"
+                      onClick={() => handleDeleteMessage(msg)}
+                    />
+                  </div>
+                )}
                 {!mine && (
                   <p className="text-xs font-semibold opacity-80 mb-0.5">
                     🌸 {msg.sender_flower_name || partnerName}

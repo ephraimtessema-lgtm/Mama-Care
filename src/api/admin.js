@@ -12,3 +12,5 @@ export async function linkDoctorToUser(doctorId, userEmail) {
 
   if (error) throw error;
 }
+
+export { adminSetUserBans } from '@/api/moderation';
