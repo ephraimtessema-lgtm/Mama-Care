@@ -107,5 +107,3 @@ npm run dev
 | `npm run build` | Production build |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | TypeScript check (JS with types) |
-=======
-A pregnancy support web app built with React, Vite, and **Supabase**.
