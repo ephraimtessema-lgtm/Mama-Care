@@ -1,17 +1,18 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/AuthContext";
+import { getLandingStats } from "@/api/publicStats";
+import { formatLandingStatCount } from "@/lib/landingStats";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Heart, Shield, Clock, BookOpen, Calendar, MessageCircle, Star, ChevronRight, Phone } from "lucide-react";
 import EthiopiaFlag from "@/components/EthiopiaFlag";
 import SiteFooter from "@/components/SiteFooter";
 
-const STATS = [
+const STATIC_STATS = [
   { value: "24/7", label: "AI Support Available" },
   { value: "100%", label: "Anonymous & Private" },
-  { value: "50+", label: "Verified OB-GYNs" },
-  { value: "10K+", label: "Moms Supported" },
 ];
 
 const FEATURES = [
@@ -71,6 +72,21 @@ function appLink(path, isAuthenticated) {
 
 export default function Landing() {
   const { isAuthenticated } = useAuth();
+  const { data: landingStats } = useQuery({
+    queryKey: ["landing_stats"],
+    queryFn: getLandingStats,
+    staleTime: 60_000,
+  });
+
+  const stats = useMemo(() => {
+    const doctors = formatLandingStatCount(landingStats?.verifiedDoctors);
+    const moms = formatLandingStatCount(landingStats?.moms);
+    return [
+      ...STATIC_STATS,
+      { value: doctors, label: "Verified OB-GYNs" },
+      { value: moms, label: "Moms Supported" },
+    ];
+  }, [landingStats]);
 
   return (
     <div className="min-h-full bg-white dark:bg-gray-950 font-sans text-gray-900 dark:text-gray-100">
@@ -110,7 +126,7 @@ export default function Landing() {
       {/* Stats */}
       <section className="py-12 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-4xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          {STATS.map((s) => (
+          {stats.map((s) => (
             <div key={s.label}>
               <div className="text-3xl font-bold text-rose-500 dark:text-rose-400">{s.value}</div>
               <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">{s.label}</div>
