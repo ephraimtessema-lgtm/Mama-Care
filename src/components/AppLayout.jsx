@@ -8,7 +8,7 @@ export default function AppLayout() {
   return (
     <>
       <SiteNav />
-      <main className={SITE_NAV_OFFSET_CLASS}>
+      <main className={`${SITE_NAV_OFFSET_CLASS} bg-background`}>
         <Outlet />
       </main>
     </>

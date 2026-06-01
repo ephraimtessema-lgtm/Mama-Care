@@ -36,15 +36,15 @@ export default function AiChatSidebar({
 
       <aside
         className={cn(
-          'flex flex-col bg-white border-r border-rose-100 shrink-0 z-40 transition-transform duration-200',
+          'flex flex-col bg-white dark:bg-gray-900 border-r border-rose-100 dark:border-gray-800 shrink-0 z-40 transition-transform duration-200',
           'fixed inset-y-0 left-0 w-[min(100vw-3rem,280px)] md:w-64',
           'top-14 md:top-0 h-[calc(100dvh-3.5rem)] md:h-full',
           open ? 'translate-x-0' : '-translate-x-full',
           className,
         )}
       >
-        <div className="p-3 border-b border-rose-100 flex items-center justify-between gap-2">
-          <span className="text-sm font-semibold text-gray-800">Chats</span>
+        <div className="p-3 border-b border-rose-100 dark:border-gray-800 flex items-center justify-between gap-2">
+          <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">Chats</span>
           <Button
             type="button"
             variant="ghost"
@@ -79,7 +79,7 @@ export default function AiChatSidebar({
                 key={session.id}
                 className={cn(
                   'group relative flex items-start gap-2 rounded-xl px-3 py-2.5 cursor-pointer transition-colors',
-                  active ? 'bg-rose-100 text-rose-900' : 'hover:bg-rose-50 text-gray-700',
+                  active ? 'bg-rose-100 dark:bg-rose-950/50 text-rose-900 dark:text-rose-200' : 'hover:bg-rose-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300',
                 )}
                 onClick={() => onSelectSession(session.id)}
                 onKeyDown={(e) => e.key === 'Enter' && onSelectSession(session.id)}

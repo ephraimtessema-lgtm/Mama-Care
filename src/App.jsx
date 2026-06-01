@@ -30,7 +30,7 @@ const AiChat = lazy(() => import('./pages/AiChat'));
 
 function PageLoader() {
   return (
-    <div className="flex flex-1 items-center justify-center min-h-[50vh] bg-rose-50">
+    <div className="flex flex-1 items-center justify-center min-h-[50vh] bg-rose-50 dark:bg-gray-950">
       <div className="text-center">
         <div className="text-4xl mb-3 animate-pulse">🌸</div>
         <div className="w-8 h-8 border-4 border-rose-200 border-t-rose-500 rounded-full animate-spin mx-auto" />
@@ -41,7 +41,7 @@ function PageLoader() {
 
 function AuthLoading() {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-rose-50 z-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-rose-50 dark:bg-gray-950 z-50">
       <div className="text-center">
         <div className="text-4xl mb-3 animate-pulse">🌸</div>
         <div className="w-8 h-8 border-4 border-rose-200 border-t-rose-500 rounded-full animate-spin mx-auto" />

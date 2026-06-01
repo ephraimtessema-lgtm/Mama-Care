@@ -97,8 +97,16 @@
 
   .dark .bg-gray-50,
   .dark .bg-rose-50,
-  .dark .bg-pink-50 {
+  .dark .bg-pink-50,
+  .dark .bg-purple-50,
+  .dark .bg-blue-50,
+  .dark .bg-yellow-50,
+  .dark .bg-green-50 {
     background-color: rgb(3 7 18) !important;
+  }
+
+  .dark .text-rose-500 {
+    color: rgb(251 113 133);
   }
 
   .dark .text-gray-900 {

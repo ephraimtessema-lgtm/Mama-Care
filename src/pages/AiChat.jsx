@@ -275,7 +275,7 @@ export default function AiChat() {
 
   if (!historyLoaded) {
     return (
-      <div className="flex h-[calc(100dvh-3.5rem)] bg-rose-50 items-center justify-center">
+      <div className="flex h-[calc(100dvh-3.5rem)] bg-rose-50 dark:bg-gray-950 items-center justify-center">
         <Loader2 className="w-8 h-8 text-rose-400 animate-spin" />
         <p className="text-sm text-gray-500 mt-3">Loading your chats…</p>
       </div>
@@ -283,7 +283,7 @@ export default function AiChat() {
   }
 
   return (
-    <div className="flex h-[calc(100dvh-3.5rem)] bg-rose-50 overflow-hidden">
+    <div className="flex h-[calc(100dvh-3.5rem)] bg-rose-50 dark:bg-gray-950 overflow-hidden">
       <AiChatSidebar
         sessions={sessions}
         activeSessionId={activeSessionId}
@@ -295,17 +295,17 @@ export default function AiChat() {
       />
 
       <div className="flex flex-col flex-1 min-w-0">
-        <div className="bg-white border-b border-rose-100 px-3 py-3 flex items-center justify-between shadow-sm shrink-0 gap-2">
+        <div className="bg-white dark:bg-gray-900 border-b border-rose-100 dark:border-gray-800 px-3 py-3 flex items-center justify-between shadow-sm shrink-0 gap-2">
           <div className="flex items-center gap-2 min-w-0">
             <AiChatMenuToggle
               open={sidebarOpen}
               onClick={() => setSidebarOpen((o) => !o)}
             />
-            <div className="w-9 h-9 rounded-full bg-rose-100 flex items-center justify-center text-lg shrink-0">
+            <div className="w-9 h-9 rounded-full bg-rose-100 dark:bg-rose-950/50 flex items-center justify-center text-lg shrink-0">
               🤖
             </div>
             <div className="min-w-0">
-              <div className="font-bold text-gray-900 text-sm truncate">Mama-Care AI</div>
+              <div className="font-bold text-gray-900 dark:text-gray-100 text-sm truncate">Mama-Care AI</div>
               <div className="text-xs text-green-500 flex items-center gap-1">
                 <span className="w-2 h-2 bg-green-400 rounded-full inline-block shrink-0" />
                 Online 24/7
@@ -313,11 +313,11 @@ export default function AiChat() {
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <Badge className="bg-rose-100 text-rose-600 border-rose-200 text-xs rounded-full hidden sm:inline-flex">
+            <Badge className="bg-rose-100 dark:bg-rose-950/50 text-rose-600 dark:text-rose-300 border-rose-200 dark:border-rose-800 text-xs rounded-full hidden sm:inline-flex">
               🌸 {flowerName}
             </Badge>
             <Link to="/doctors">
-              <Button size="sm" variant="outline" className="text-xs border-rose-300 text-rose-600 rounded-full">
+              <Button size="sm" variant="outline" className="text-xs border-rose-300 dark:border-rose-700 text-rose-600 dark:text-rose-300 rounded-full dark:bg-gray-900">
                 Book Doctor
               </Button>
             </Link>
@@ -365,8 +365,8 @@ export default function AiChat() {
                 className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
                   msg.role === "assistant"
                     ? msg.is_emergency
-                      ? "bg-red-50 border border-red-200 text-gray-800"
-                      : "bg-white border border-rose-100 text-gray-800 shadow-sm"
+                      ? "bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-gray-800 dark:text-gray-100"
+                      : "bg-white dark:bg-gray-900 border border-rose-100 dark:border-gray-800 text-gray-800 dark:text-gray-100 shadow-sm"
                     : "bg-rose-500 text-white"
                 }`}
               >
@@ -381,7 +381,7 @@ export default function AiChat() {
                 <div className="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center">
                   <Bot className="w-4 h-4 text-rose-500" />
                 </div>
-                <div className="bg-white border border-rose-100 rounded-2xl px-4 py-3 flex items-center gap-2 shadow-sm">
+                <div className="bg-white dark:bg-gray-900 border border-rose-100 dark:border-gray-800 rounded-2xl px-4 py-3 flex items-center gap-2 shadow-sm">
                   <Loader2 className="w-4 h-4 text-rose-400 animate-spin" />
                   <span className="text-sm text-gray-400">Mama-Care is thinking… 💭</span>
                 </div>
@@ -405,14 +405,14 @@ export default function AiChat() {
           </div>
         )}
 
-        <div className="bg-white border-t border-rose-100 px-4 py-3 shrink-0">
+        <div className="bg-white dark:bg-gray-900 border-t border-rose-100 dark:border-gray-800 px-4 py-3 shrink-0">
           <div className="flex gap-2 max-w-3xl mx-auto">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKey}
               placeholder="Ask about pregnancy, symptoms, nutrition…"
-              className="rounded-full border-rose-200 focus:border-rose-400 bg-rose-50"
+              className="rounded-full border-rose-200 dark:border-gray-700 focus:border-rose-400 bg-rose-50 dark:bg-gray-800 dark:text-gray-100"
             />
             <Button
               onClick={() => sendMessage()}
