@@ -70,6 +70,11 @@ export function applyLanguage(code) {
   localStorage.setItem('mamacare_language', lang);
 }
 
+export function getSavedLanguage() {
+  const lang = localStorage.getItem('mamacare_language');
+  return LANGUAGES.some((l) => l.code === lang) ? lang : 'en';
+}
+
 export function formatDisplayDate(iso) {
   if (!iso) return '—';
   try {

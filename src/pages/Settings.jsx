@@ -27,9 +27,9 @@ import {
   mergePreferences,
   loadLocalPreferences,
   saveLocalPreferences,
-  applyLanguage,
   formatDisplayDate,
 } from '@/lib/userSettings';
+import { applyAppLanguage } from '@/lib/runtimeLanguage';
 import { isAdmin, isDoctor } from '@/lib/roles';
 import {
   Phone,
@@ -103,7 +103,7 @@ export default function Settings() {
         setFlowerName(profile?.flower_name || getFlowerName(user) || '');
         const merged = mergePreferences(profile?.preferences || loadLocalPreferences(user.id));
         setPrefs(merged);
-        applyLanguage(merged.language);
+        applyAppLanguage(merged.language);
       } catch (e) {
         console.error(e);
         setFullName(user.full_name || '');
@@ -148,10 +148,10 @@ export default function Settings() {
     setPrefs(nextPrefs);
     try {
       await updateUserProfile(user.id, { preferences: nextPrefs });
-      applyLanguage(nextPrefs.language);
+      applyAppLanguage(nextPrefs.language);
     } catch {
       saveLocalPreferences(user.id, nextPrefs);
-      applyLanguage(nextPrefs.language);
+      applyAppLanguage(nextPrefs.language);
     }
   };
 

@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
@@ -23,6 +23,8 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import VerifyEmail from './pages/VerifyEmail';
 import Settings from './pages/Settings';
+import { getSavedLanguage } from '@/lib/userSettings';
+import { applyAppLanguage } from '@/lib/runtimeLanguage';
 
 const AiChat = lazy(() => import('./pages/AiChat'));
 
@@ -94,6 +96,11 @@ const AppRoutes = () => {
 };
 
 function App() {
+  useEffect(() => {
+    const saved = getSavedLanguage();
+    applyAppLanguage(saved);
+  }, []);
+
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
