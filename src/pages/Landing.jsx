@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Heart, Shield, Clock, BookOpen, Calendar, MessageCircle, Star, ChevronRight, Phone } from "lucide-react";
 import EthiopiaFlag from "@/components/EthiopiaFlag";
+import SiteFooter from "@/components/SiteFooter";
 
 const STATS = [
   { value: "24/7", label: "AI Support Available" },
@@ -214,15 +215,7 @@ export default function Landing() {
         </Link>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-10 px-4 text-center text-sm">
-        <div className="flex items-center justify-center gap-2 mb-3">
-          <span className="w-7 h-7 rounded-full bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center text-base" aria-hidden>🌸</span>
-          <span className="text-white font-bold">Mama-Care</span>
-        </div>
-        <p className="mb-2">Built with ❤️ for Ethiopian Mothers</p>
-        <p className="text-gray-600 text-xs">This platform provides informational support only. Always consult a licensed medical professional for medical decisions.</p>
-      </footer>
+      <SiteFooter variant="landing" />
     </div>
   );
 }
