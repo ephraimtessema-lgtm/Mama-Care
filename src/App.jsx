@@ -19,6 +19,7 @@ import Articles from './pages/Articles';
 import AdminDashboard from './pages/AdminDashboard';
 import DoctorDashboard from './pages/DoctorDashboard';
 import MotherChat from './pages/MotherChat';
+import MotherPrivateChat from './pages/MotherPrivateChat';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import VerifyEmail from './pages/VerifyEmail';
@@ -74,6 +75,7 @@ const AppRoutes = () => {
             <Route path="/chat" element={<AiChat />} />
             <Route path="/forum" element={<Forum />} />
             <Route path="/mother-chat" element={<MotherChat />} />
+            <Route path="/mother-chat/dm/:partnerId" element={<MotherPrivateChat />} />
             <Route path="/doctors" element={<Doctors />} />
             <Route path="/articles" element={<Articles />} />
             <Route path="/book" element={<BookAppointment />} />
