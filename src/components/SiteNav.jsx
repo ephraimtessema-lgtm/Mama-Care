@@ -4,6 +4,7 @@ import { Menu } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { isAdmin, isDoctor } from '@/lib/roles';
 import UserProfileMenu from '@/components/UserProfileMenu';
+import ThemeToggle from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -50,7 +51,7 @@ function NavLinks({ isAuthenticated, user, onNavigate, className = '' }) {
             <Link
               to={authPath(to, isAuthenticated)}
               onClick={onNavigate}
-              className="block py-3 text-base text-gray-700 hover:text-rose-500 border-b border-rose-50 last:border-0 transition-colors"
+              className="block py-3 text-base text-gray-700 dark:text-gray-200 hover:text-rose-500 border-b border-rose-50 dark:border-gray-800 last:border-0 transition-colors"
             >
               {label}
             </Link>
@@ -107,17 +108,17 @@ export default function SiteNav() {
   }, [isAuthenticated, refreshUser]);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur border-b border-rose-100">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-gray-950/90 backdrop-blur border-b border-rose-100 dark:border-gray-800">
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
         <Link to="/" className="flex items-center gap-2 min-w-0 shrink">
           <span className="w-9 h-9 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center text-xl shadow-sm shadow-rose-200 shrink-0">
             🌸
           </span>
-          <span className="text-lg sm:text-xl font-bold text-rose-600 truncate">Mama-Care</span>
+          <span className="text-lg sm:text-xl font-bold text-rose-600 dark:text-rose-400 truncate">Mama-Care</span>
         </Link>
 
         {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-6 text-sm text-gray-600">
+        <div className="hidden md:flex items-center gap-6 text-sm text-gray-600 dark:text-gray-300">
           {desktopLinks.map(({ to, label }) => (
             <Link
               key={to}
@@ -129,30 +130,33 @@ export default function SiteNav() {
           ))}
         </div>
 
-        {/* Desktop auth */}
-        <div className="hidden md:block">
-          <AuthActions
-            isAuthenticated={isAuthenticated}
-            user={user}
-            logout={logout}
-          />
-        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          <ThemeToggle />
 
-        {/* Mobile menu */}
-        <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+          {/* Desktop auth */}
+          <div className="hidden md:block">
+            <AuthActions
+              isAuthenticated={isAuthenticated}
+              user={user}
+              logout={logout}
+            />
+          </div>
+
+          {/* Mobile menu */}
+          <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
           <Button
             type="button"
             variant="ghost"
             size="icon"
-            className="md:hidden shrink-0 text-gray-700 hover:text-rose-500 hover:bg-rose-50"
+            className="md:hidden shrink-0 text-gray-700 dark:text-gray-200 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-gray-800"
             aria-label="Open menu"
             onClick={() => setMenuOpen(true)}
           >
             <Menu className="w-6 h-6" />
           </Button>
           <SheetContent side="right" className="w-[min(100vw-2rem,320px)] p-0 flex flex-col">
-            <SheetHeader className="px-6 pt-6 pb-2 text-left border-b border-rose-100">
-              <SheetTitle className="text-rose-600 font-bold">Menu</SheetTitle>
+            <SheetHeader className="px-6 pt-6 pb-2 text-left border-b border-rose-100 dark:border-gray-800">
+              <SheetTitle className="text-rose-600 dark:text-rose-400 font-bold">Menu</SheetTitle>
             </SheetHeader>
             <nav className="flex-1 overflow-y-auto px-6 py-2">
               <NavLinks
@@ -174,6 +178,7 @@ export default function SiteNav() {
             </div>
           </SheetContent>
         </Sheet>
+        </div>
       </div>
     </nav>
   );
