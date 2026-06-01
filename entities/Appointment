@@ -1,0 +1,62 @@
+{
+  "name": "Appointment",
+  "type": "object",
+  "properties": {
+    "patient_name": {
+      "type": "string"
+    },
+    "patient_email": {
+      "type": "string"
+    },
+    "patient_phone": {
+      "type": "string"
+    },
+    "doctor_id": {
+      "type": "string"
+    },
+    "doctor_name": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "time": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "online",
+        "physical"
+      ],
+      "default": "online"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "confirmed",
+        "completed",
+        "cancelled"
+      ],
+      "default": "pending"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "is_emergency": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "patient_name",
+    "doctor_id",
+    "date",
+    "time"
+  ]
+}

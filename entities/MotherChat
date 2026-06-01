@@ -1,0 +1,35 @@
+{
+  "name": "MotherChat",
+  "type": "object",
+  "properties": {
+    "sender_name": {
+      "type": "string",
+      "description": "Display name of the sender"
+    },
+    "sender_email": {
+      "type": "string",
+      "description": "Email of the sender"
+    },
+    "receiver_email": {
+      "type": "string",
+      "description": "Email of the receiver (for DMs)"
+    },
+    "room": {
+      "type": "string",
+      "description": "Chat room name (e.g. 'general', 'first_trimester')",
+      "default": "general"
+    },
+    "content": {
+      "type": "string"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "sender_email",
+    "content",
+    "room"
+  ]
+}

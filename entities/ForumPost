@@ -1,0 +1,65 @@
+{
+  "name": "ForumPost",
+  "type": "object",
+  "properties": {
+    "flower_name": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "content": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "first_trimester",
+        "second_trimester",
+        "third_trimester",
+        "nutrition",
+        "mental_health",
+        "labor_delivery",
+        "postpartum",
+        "general"
+      ],
+      "default": "general"
+    },
+    "likes": {
+      "type": "number",
+      "default": 0
+    },
+    "replies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "flower_name": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "is_pinned": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "flower_name",
+    "title",
+    "content"
+  ]
+}

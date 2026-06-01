@@ -1,0 +1,59 @@
+{
+  "name": "Article",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "content": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "nutrition",
+        "exercise",
+        "mental_health",
+        "symptoms",
+        "labor",
+        "postpartum",
+        "newborn_care",
+        "emergency_signs"
+      ],
+      "default": "general"
+    },
+    "trimester": {
+      "type": "string",
+      "enum": [
+        "first",
+        "second",
+        "third",
+        "all"
+      ],
+      "default": "all"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "read_time_minutes": {
+      "type": "number"
+    },
+    "is_published": {
+      "type": "boolean",
+      "default": true
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "title",
+    "content"
+  ]
+}

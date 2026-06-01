@@ -1,0 +1,44 @@
+{
+  "name": "ChatSession",
+  "type": "object",
+  "properties": {
+    "flower_name": {
+      "type": "string",
+      "description": "Anonymous alias like 'Blue Lily'"
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "assistant"
+            ]
+          },
+          "content": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "is_emergency": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "has_emergency": {
+      "type": "boolean",
+      "default": false
+    },
+    "user_email": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "flower_name"
+  ]
+}

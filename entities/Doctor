@@ -1,0 +1,82 @@
+{
+  "name": "Doctor",
+  "type": "object",
+  "properties": {
+    "full_name": {
+      "type": "string"
+    },
+    "specialty": {
+      "type": "string",
+      "default": "OB-GYN"
+    },
+    "bio": {
+      "type": "string"
+    },
+    "photo_url": {
+      "type": "string"
+    },
+    "hospital": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "years_experience": {
+      "type": "number"
+    },
+    "languages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "availability": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "day": {
+            "type": "string"
+          },
+          "start_time": {
+            "type": "string"
+          },
+          "end_time": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "consultation_fee": {
+      "type": "number"
+    },
+    "rating": {
+      "type": "number"
+    },
+    "total_reviews": {
+      "type": "number"
+    },
+    "is_verified": {
+      "type": "boolean",
+      "default": false
+    },
+    "accepts_online": {
+      "type": "boolean",
+      "default": true
+    },
+    "accepts_physical": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "full_name",
+    "specialty"
+  ]
+}
