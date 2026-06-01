@@ -1,5 +1,4 @@
 # Mama-Care
-<<<<<<< HEAD
 
 A pregnancy support web app built with React, Vite, and **Supabase**.
 
@@ -110,4 +109,3 @@ npm run dev
 | `npm run typecheck` | TypeScript check (JS with types) |
 =======
 A pregnancy support web app built with React, Vite, and **Supabase**.
->>>>>>> 432e0fb78afe17feecbcb464afbc800ea11292e6
