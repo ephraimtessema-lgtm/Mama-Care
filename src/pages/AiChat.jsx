@@ -336,9 +336,9 @@ export default function AiChat() {
               <AlertTriangle className="w-5 h-5 flex-shrink-0" />
               <span className="text-sm font-medium">Possible emergency — seek medical help now!</span>
             </div>
-            <a href="tel:911">
+            <a href="tel:8044">
               <Button size="sm" className="bg-white text-red-500 hover:bg-red-50 rounded-full gap-1 text-xs font-bold">
-                <Phone className="w-3 h-3" /> Call 911
+                <Phone className="w-3 h-3" /> Call 8044
               </Button>
             </a>
           </div>

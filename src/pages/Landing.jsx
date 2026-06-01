@@ -133,9 +133,9 @@ export default function Landing() {
               <div className="text-red-100 text-sm">Our AI detects danger signs automatically and alerts you with emergency contacts</div>
             </div>
           </div>
-          <a href="tel:911">
+          <a href="tel:8044">
             <Button className="bg-white text-red-500 hover:bg-red-50 rounded-full gap-2 font-bold">
-              <Phone className="w-4 h-4" /> Call Emergency: 911
+              <Phone className="w-4 h-4" /> Call pregnancy line: 8044
             </Button>
           </a>
         </div>

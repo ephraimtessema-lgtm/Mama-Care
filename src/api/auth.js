@@ -13,7 +13,7 @@ export async function mapUser(user) {
   if (!user) return null;
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .select('full_name, role, flower_name')
+    .select('full_name, role, flower_name, phone, due_date, baby_birth_date, preferences')
     .eq('id', user.id)
     .maybeSingle();
 
@@ -41,6 +41,10 @@ export async function mapUser(user) {
       user.email?.split('@')[0] ||
       '',
     flower_name,
+    phone: profile?.phone || null,
+    due_date: profile?.due_date || null,
+    baby_birth_date: profile?.baby_birth_date || null,
+    preferences: profile?.preferences || null,
     role: profile?.role || 'user',
     user_metadata: user.user_metadata,
   };

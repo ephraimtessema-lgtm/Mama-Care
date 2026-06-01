@@ -1,79 +1,554 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { getUsername, getFlowerName } from '@/lib/displayName';
 import UserAvatar from '@/components/UserAvatar';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  getUserProfile,
+  updateUserProfile,
+  updateFlowerName,
+  pickRandomFlowerName,
+  FLOWER_NAMES,
+} from '@/api/userProfile';
+import {
+  LANGUAGES,
+  mergePreferences,
+  loadLocalPreferences,
+  saveLocalPreferences,
+  applyLanguage,
+  formatDisplayDate,
+} from '@/lib/userSettings';
 import { isAdmin, isDoctor } from '@/lib/roles';
+import {
+  Phone,
+  Mail,
+  Calendar,
+  Bell,
+  Globe,
+  Shield,
+  MessageCircle,
+  Info,
+  AlertTriangle,
+  MapPin,
+  BookOpen,
+  Loader2,
+  Sparkles,
+  LogOut,
+} from 'lucide-react';
+import packageJson from '../../package.json';
+
+function SettingsSection({ title, icon: Icon, children, className = '' }) {
+  return (
+    <section className={`bg-white rounded-2xl border border-rose-100 shadow-sm overflow-hidden ${className}`}>
+      <div className="px-5 py-4 border-b border-rose-50 flex items-center gap-2">
+        {Icon && <Icon className="w-4 h-4 text-rose-500 shrink-0" />}
+        <h2 className="font-semibold text-gray-900 text-sm">{title}</h2>
+      </div>
+      <div className="p-5 space-y-4">{children}</div>
+    </section>
+  );
+}
+
+function ToggleRow({ label, description, checked, onCheckedChange }) {
+  return (
+    <div className="flex items-start justify-between gap-4">
+      <div>
+        <p className="text-sm font-medium text-gray-800">{label}</p>
+        {description && <p className="text-xs text-gray-500 mt-0.5">{description}</p>}
+      </div>
+      <Switch checked={checked} onCheckedChange={onCheckedChange} />
+    </div>
+  );
+}
 
 export default function Settings() {
-  const { user, logout } = useAuth();
+  const { user, logout, refreshUser } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [flowerSaving, setFlowerSaving] = useState(false);
+  const [message, setMessage] = useState('');
+
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [dueDate, setDueDate] = useState('');
+  const [babyBirthDate, setBabyBirthDate] = useState('');
+  const [flowerName, setFlowerName] = useState('');
+  const [customFlower, setCustomFlower] = useState('');
+  const [prefs, setPrefs] = useState(() => mergePreferences(null));
+
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const profile = await getUserProfile(user.id);
+        if (cancelled) return;
+        setFullName(profile?.full_name || user.full_name || '');
+        setPhone(profile?.phone || user.phone || '');
+        setDueDate(profile?.due_date || user.due_date || '');
+        setBabyBirthDate(profile?.baby_birth_date || user.baby_birth_date || '');
+        setFlowerName(profile?.flower_name || getFlowerName(user) || '');
+        const merged = mergePreferences(profile?.preferences || loadLocalPreferences(user.id));
+        setPrefs(merged);
+        applyLanguage(merged.language);
+      } catch (e) {
+        console.error(e);
+        setFullName(user.full_name || '');
+        setFlowerName(getFlowerName(user) || '');
+        setPrefs(loadLocalPreferences(user.id));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  const flash = (text) => {
+    setMessage(text);
+    setTimeout(() => setMessage(''), 3500);
+  };
+
+  const saveProfile = async () => {
+    if (!user?.id) return;
+    setSaving(true);
+    try {
+      await updateUserProfile(user.id, {
+        full_name: fullName.trim(),
+        phone: phone.trim() || null,
+        due_date: dueDate || null,
+        baby_birth_date: babyBirthDate || null,
+      });
+      await refreshUser?.();
+      flash('Profile saved.');
+    } catch (e) {
+      flash(e?.message || 'Could not save profile. Run migration 005 in Supabase.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const savePreferences = async (nextPrefs) => {
+    if (!user?.id) return;
+    setPrefs(nextPrefs);
+    try {
+      await updateUserProfile(user.id, { preferences: nextPrefs });
+      applyLanguage(nextPrefs.language);
+    } catch {
+      saveLocalPreferences(user.id, nextPrefs);
+      applyLanguage(nextPrefs.language);
+    }
+  };
+
+  const changeFlower = async (name) => {
+    if (!user?.id || !name) return;
+    setFlowerSaving(true);
+    try {
+      await updateFlowerName(user.id, name);
+      setFlowerName(name);
+      setCustomFlower('');
+      await refreshUser?.();
+      flash(`Flower name updated to ${name}.`);
+    } catch (e) {
+      flash(e?.message || 'Could not update flower name.');
+    } finally {
+      setFlowerSaving(false);
+    }
+  };
+
+  const updateNotif = (key, value) => {
+    const next = {
+      ...prefs,
+      notifications: { ...prefs.notifications, [key]: value },
+    };
+    savePreferences(next);
+  };
+
+  const updatePrivacy = (key, value) => {
+    const next = {
+      ...prefs,
+      privacy: { ...prefs.privacy, [key]: value },
+    };
+    savePreferences(next);
+  };
+
+  const updateCommunity = (key, value) => {
+    const next = {
+      ...prefs,
+      community: { ...prefs.community, [key]: value },
+    };
+    savePreferences(next);
+  };
 
   if (!user) return null;
 
   const username = getUsername(user);
-  const flowerName = getFlowerName(user);
+
+  if (loading) {
+    return (
+      <div className="min-h-[calc(100dvh-3.5rem)] bg-rose-50/50 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-rose-400 animate-spin" />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-[calc(100dvh-3.5rem)] bg-gray-50 py-8 px-4">
-      <div className="max-w-md mx-auto">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Settings</h1>
+    <div className="min-h-[calc(100dvh-3.5rem)] bg-gradient-to-b from-rose-50/80 to-gray-50 py-8 px-4 pb-16">
+      <div className="max-w-lg mx-auto space-y-5">
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
+          <Link to="/" className="text-sm text-rose-600 hover:text-rose-700">
+            ← Home
+          </Link>
+        </div>
 
-        <div className="bg-white rounded-2xl border border-rose-100 shadow-sm p-6 space-y-6">
-          <div className="flex items-center gap-4">
-            <UserAvatar user={user} size="lg" />
-            <div className="min-w-0">
-              <p className="font-semibold text-gray-900">{username}</p>
-              <p className="text-sm text-gray-500 truncate">{user.email}</p>
-            </div>
-          </div>
+        {message && (
+          <p className="text-sm text-center bg-white border border-rose-200 text-rose-800 rounded-xl py-2 px-4">
+            {message}
+          </p>
+        )}
 
-          {flowerName && (
-            <p className="text-sm text-rose-700 bg-rose-50 border border-rose-100 rounded-xl px-4 py-3">
-              Your flower name is: <span className="font-semibold">🌸 {flowerName}</span>
-              <span className="block text-xs text-rose-600/80 mt-1 font-normal">
-                Used in Forum and Mom Chat so others do not see your real name.
-              </span>
+        {/* Header card */}
+        <div className="bg-white rounded-2xl border border-rose-100 shadow-sm p-5 flex items-center gap-4">
+          <UserAvatar user={user} size="lg" />
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold text-gray-900 truncate">{username}</p>
+            <p className="text-sm text-gray-500 truncate flex items-center gap-1">
+              <Mail className="w-3.5 h-3.5 shrink-0" />
+              {user.email}
             </p>
-          )}
-
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between py-2 border-b border-gray-100">
-              <span className="text-gray-500">Account type</span>
-              <span className="font-medium text-gray-800 capitalize">{user.role || 'user'}</span>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            {isAdmin(user) && (
-              <Link to="/admin">
-                <Button variant="outline" className="w-full rounded-full">
-                  Admin dashboard
-                </Button>
-              </Link>
-            )}
-            {isDoctor(user) && (
-              <Link to="/doctor">
-                <Button variant="outline" className="w-full rounded-full">
-                  Doctor dashboard
-                </Button>
-              </Link>
-            )}
-            <Button
-              variant="outline"
-              className="w-full rounded-full border-red-200 text-red-600 hover:bg-red-50"
-              onClick={() => logout(false)}
-            >
-              Sign out
-            </Button>
           </div>
         </div>
 
-        <p className="text-center mt-6">
-          <Link to="/" className="text-sm text-rose-500 hover:text-rose-600">
-            ← Back to home
+        {/* Profile */}
+        <SettingsSection title="Profile" icon={Sparkles}>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs text-gray-500">Full name</Label>
+              <Input
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="mt-1 rounded-xl"
+                placeholder="Your name (private)"
+              />
+            </div>
+            <div>
+              <Label className="text-xs text-gray-500">Email</Label>
+              <Input value={user.email || ''} disabled className="mt-1 rounded-xl bg-gray-50" />
+              <p className="text-[10px] text-gray-400 mt-1">Email is managed through your login account.</p>
+            </div>
+            <div>
+              <Label className="text-xs text-gray-500">Phone number</Label>
+              <Input
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="mt-1 rounded-xl"
+                placeholder="+251 9xx xxx xxx"
+              />
+            </div>
+            <div>
+              <Label className="text-xs text-gray-500 flex items-center gap-1">
+                <Calendar className="w-3 h-3" /> Due date
+              </Label>
+              <Input
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                className="mt-1 rounded-xl"
+              />
+              {dueDate && (
+                <p className="text-xs text-rose-600 mt-1">Due: {formatDisplayDate(dueDate)}</p>
+              )}
+            </div>
+            <div>
+              <Label className="text-xs text-gray-500">Baby birth date (if already delivered)</Label>
+              <Input
+                type="date"
+                value={babyBirthDate}
+                onChange={(e) => setBabyBirthDate(e.target.value)}
+                className="mt-1 rounded-xl"
+              />
+            </div>
+          </div>
+          <Button
+            onClick={saveProfile}
+            disabled={saving}
+            className="w-full rounded-xl bg-rose-500 hover:bg-rose-600"
+          >
+            {saving ? 'Saving…' : 'Save profile'}
+          </Button>
+        </SettingsSection>
+
+        {/* Flower name */}
+        <SettingsSection title="Change flower name" icon={Sparkles}>
+          <p className="text-xs text-gray-500 -mt-2">
+            Your anonymous name in Forum and Mom Chat. Others do not see your real name.
+          </p>
+          <div className="bg-rose-50 border border-rose-100 rounded-xl px-4 py-3 text-center">
+            <p className="text-xs text-rose-600 mb-1">Current flower name</p>
+            <p className="text-lg font-semibold text-rose-800">🌸 {flowerName || '—'}</p>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {FLOWER_NAMES.map((name) => (
+              <Button
+                key={name}
+                type="button"
+                variant={flowerName === name ? 'default' : 'outline'}
+                size="sm"
+                className={`rounded-xl text-xs h-9 ${
+                  flowerName === name ? 'bg-rose-500 hover:bg-rose-600' : ''
+                }`}
+                disabled={flowerSaving}
+                onClick={() => changeFlower(name)}
+              >
+                {name}
+              </Button>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <Input
+              value={customFlower}
+              onChange={(e) => setCustomFlower(e.target.value)}
+              placeholder="Or type a flower name"
+              className="rounded-xl flex-1"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-xl shrink-0"
+              disabled={flowerSaving || !customFlower.trim()}
+              onClick={() => changeFlower(customFlower.trim())}
+            >
+              Set
+            </Button>
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            className="w-full text-rose-600 rounded-xl text-sm"
+            disabled={flowerSaving}
+            onClick={() => changeFlower(pickRandomFlowerName())}
+          >
+            🎲 Surprise me with a random name
+          </Button>
+        </SettingsSection>
+
+        {/* Emergency — high visibility */}
+        <SettingsSection
+          title="Emergency support"
+          icon={AlertTriangle}
+          className="border-red-200 ring-1 ring-red-100"
+        >
+          <p className="text-xs text-red-700 bg-red-50 rounded-lg px-3 py-2 -mt-2">
+            If you or your baby may be in danger, call immediately or go to the nearest hospital.
+          </p>
+          <a href="tel:8044" className="block">
+            <Button className="w-full rounded-xl bg-red-600 hover:bg-red-700 text-white h-12 text-base font-bold gap-2">
+              <Phone className="w-5 h-5" />
+              Call pregnancy hotline: 8044
+            </Button>
+          </a>
+          <Link to="/articles?category=emergency_signs" className="block">
+            <Button variant="outline" className="w-full rounded-xl border-red-200 text-red-700 gap-2">
+              <BookOpen className="w-4 h-4" />
+              Emergency warning signs (library)
+            </Button>
           </Link>
-        </p>
+          <a
+            href="https://www.google.com/maps/search/hospital+near+me"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block"
+          >
+            <Button variant="outline" className="w-full rounded-xl gap-2">
+              <MapPin className="w-4 h-4" />
+              Find nearest hospital (maps)
+            </Button>
+          </a>
+        </SettingsSection>
+
+        {/* Notifications */}
+        <SettingsSection title="Notifications" icon={Bell}>
+          <ToggleRow
+            label="Daily pregnancy tips"
+            checked={prefs.notifications.dailyTips}
+            onCheckedChange={(v) => updateNotif('dailyTips', v)}
+          />
+          <Separator />
+          <ToggleRow
+            label="Appointment reminders"
+            checked={prefs.notifications.appointmentReminders}
+            onCheckedChange={(v) => updateNotif('appointmentReminders', v)}
+          />
+          <Separator />
+          <ToggleRow
+            label="Community replies"
+            checked={prefs.notifications.communityReplies}
+            onCheckedChange={(v) => updateNotif('communityReplies', v)}
+          />
+          <Separator />
+          <ToggleRow
+            label="Weekly baby growth updates"
+            checked={prefs.notifications.weeklyBabyGrowth}
+            onCheckedChange={(v) => updateNotif('weeklyBabyGrowth', v)}
+          />
+          <p className="text-[10px] text-gray-400">
+            Email and push delivery will use these preferences when we enable them.
+          </p>
+        </SettingsSection>
+
+        {/* Language */}
+        <SettingsSection title="Language" icon={Globe}>
+          <Label className="text-xs text-gray-500">App language</Label>
+          <Select
+            value={prefs.language}
+            onValueChange={(code) => savePreferences({ ...prefs, language: code })}
+          >
+            <SelectTrigger className="rounded-xl mt-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {LANGUAGES.map((lang) => (
+                <SelectItem key={lang.code} value={lang.code}>
+                  {lang.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-[10px] text-gray-400">
+            Full translations for Amharic, Oromo, and Tigrinya are coming soon. Your choice is saved now.
+          </p>
+        </SettingsSection>
+
+        {/* Privacy */}
+        <SettingsSection title="Privacy & safety" icon={Shield}>
+          <div>
+            <Label className="text-xs text-gray-500">Who can message me</Label>
+            <Select
+              value={prefs.privacy.whoCanMessage}
+              onValueChange={(v) => updatePrivacy('whoCanMessage', v)}
+            >
+              <SelectTrigger className="rounded-xl mt-1">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="everyone">Everyone in community</SelectItem>
+                <SelectItem value="flower_only">Only people who know my flower name</SelectItem>
+                <SelectItem value="none">No one (block messages)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <ToggleRow
+            label="Show profile in community"
+            description="Allow others to see your flower name in lists"
+            checked={prefs.privacy.showProfileInCommunity}
+            onCheckedChange={(v) => updatePrivacy('showProfileInCommunity', v)}
+          />
+          <Separator />
+          <div className="text-sm text-gray-600">
+            <p className="font-medium text-gray-800 mb-1">Blocked users</p>
+            <p className="text-xs text-gray-500">
+              {(prefs.privacy.blockedUsers?.length || 0) === 0
+                ? 'No blocked users yet.'
+                : `${prefs.privacy.blockedUsers.length} blocked`}
+            </p>
+          </div>
+          <a href="mailto:mamacareeth@gmail.com?subject=Mama-Care%20—%20Report%20abuse">
+            <Button variant="outline" className="w-full rounded-xl text-sm">
+              Report abuse / get help
+            </Button>
+          </a>
+        </SettingsSection>
+
+        {/* Community */}
+        <SettingsSection title="Community" icon={MessageCircle}>
+          <ToggleRow
+            label="Allow direct messages"
+            checked={prefs.community.allowDirectMessages}
+            onCheckedChange={(v) => updateCommunity('allowDirectMessages', v)}
+          />
+          <Separator />
+          <ToggleRow
+            label="Show flower name publicly"
+            checked={prefs.community.showFlowerNamePublicly}
+            onCheckedChange={(v) => updateCommunity('showFlowerNamePublicly', v)}
+          />
+          <Separator />
+          <ToggleRow
+            label="Community participation"
+            checked={prefs.community.participationEnabled}
+            onCheckedChange={(v) => updateCommunity('participationEnabled', v)}
+          />
+        </SettingsSection>
+
+        {/* About */}
+        <SettingsSection title="About" icon={Info}>
+          <div className="space-y-2 text-sm">
+            <a
+              href="https://github.com/ephraimtessema-lgtm/Mama-Care"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block py-2 text-rose-600 hover:underline"
+            >
+              Terms of Service
+            </a>
+            <a
+              href="https://github.com/ephraimtessema-lgtm/Mama-Care"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block py-2 text-rose-600 hover:underline"
+            >
+              Privacy Policy
+            </a>
+            <a href="mailto:mamacareeth@gmail.com" className="block py-2 text-rose-600 hover:underline">
+              Contact support
+            </a>
+            <p className="text-xs text-gray-400 pt-2 border-t border-gray-100">
+              App version {packageJson.version || '0.0.0'}
+            </p>
+          </div>
+        </SettingsSection>
+
+        {/* Dashboard links + sign out */}
+        <div className="space-y-2 pt-2">
+          {isAdmin(user) && (
+            <Link to="/admin">
+              <Button variant="outline" className="w-full rounded-xl">
+                Admin dashboard
+              </Button>
+            </Link>
+          )}
+          {isDoctor(user) && (
+            <Link to="/doctor">
+              <Button variant="outline" className="w-full rounded-xl">
+                Doctor dashboard
+              </Button>
+            </Link>
+          )}
+          <Button
+            variant="outline"
+            className="w-full rounded-xl border-red-200 text-red-600 hover:bg-red-50 gap-2"
+            onClick={() => logout(false)}
+          >
+            <LogOut className="w-4 h-4" />
+            Sign out
+          </Button>
+        </div>
       </div>
     </div>
   );

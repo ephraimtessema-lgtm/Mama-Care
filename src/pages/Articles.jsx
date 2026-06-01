@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Article } from "@/api/entities";
 import { Input } from "@/components/ui/input";
@@ -22,9 +23,15 @@ const CATEGORY_CONFIG = {
 const TRIMESTER_LABELS = { first: "1st Trimester", second: "2nd Trimester", third: "3rd Trimester", all: "All Stages" };
 
 export default function Articles() {
+  const [searchParams] = useSearchParams();
   const [search, setSearch] = useState("");
   const [filterCat, setFilterCat] = useState("all");
   const [selected, setSelected] = useState(null);
+
+  useEffect(() => {
+    const cat = searchParams.get("category");
+    if (cat && CATEGORY_CONFIG[cat]) setFilterCat(cat);
+  }, [searchParams]);
 
   const { data: articles = [], isLoading } = useQuery({
     queryKey: ["articles"],
