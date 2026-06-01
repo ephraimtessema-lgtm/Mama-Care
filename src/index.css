@@ -147,3 +147,28 @@
     color: rgb(156 163 175) !important;
   }
 }
+
+/* Google Translate injects UI that causes flicker / dim overlay — hide it */
+.goog-te-banner-frame,
+.skiptranslate,
+#goog-gt-tt,
+.goog-te-balloon-frame,
+.goog-te-gadget {
+  display: none !important;
+}
+
+body {
+  top: 0 !important;
+  position: static !important;
+}
+
+.translated-ltr body,
+.translated-ltr {
+  filter: none !important;
+  background-color: inherit !important;
+}
+
+font[style*='background-color'] {
+  background-color: inherit !important;
+  box-shadow: none !important;
+}

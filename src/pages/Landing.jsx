@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Heart, Shield, Clock, BookOpen, Calendar, MessageCircle, Star, ChevronRight, Phone } from "lucide-react";
+import EthiopiaFlag from "@/components/EthiopiaFlag";
 
 const STATS = [
   { value: "24/7", label: "AI Support Available" },
@@ -75,8 +76,9 @@ export default function Landing() {
       {/* Hero */}
       <section className="pt-10 pb-20 px-4 bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
         <div className="max-w-4xl mx-auto text-center">
-          <Badge className="mb-4 bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-300 border-rose-200 dark:border-rose-800 text-sm px-4 py-1 rounded-full">
-            🇪🇹 Designed for Ethiopian Mothers
+          <Badge className="mb-4 bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-300 border-rose-200 dark:border-rose-800 text-sm px-4 py-1 rounded-full inline-flex items-center gap-2">
+            <EthiopiaFlag />
+            Designed for Ethiopian Mothers
           </Badge>
           <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-gray-900 dark:text-gray-50 mb-6 leading-tight">
             Your Safe Space for<br />

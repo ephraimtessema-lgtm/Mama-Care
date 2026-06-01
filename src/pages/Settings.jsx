@@ -29,7 +29,7 @@ import {
   saveLocalPreferences,
   formatDisplayDate,
 } from '@/lib/userSettings';
-import { applyAppLanguage } from '@/lib/runtimeLanguage';
+import { applyAppLanguage, setDocumentLanguage } from '@/lib/runtimeLanguage';
 import { isAdmin, isDoctor } from '@/lib/roles';
 import {
   Phone,
@@ -48,13 +48,16 @@ import {
   LogOut,
 } from 'lucide-react';
 import packageJson from '../../package.json';
+import EthiopiaFlag from '@/components/EthiopiaFlag';
 
 function SettingsSection({ title, icon: Icon, children, className = '' }) {
   return (
-    <section className={`bg-white rounded-2xl border border-rose-100 shadow-sm overflow-hidden ${className}`}>
-      <div className="px-5 py-4 border-b border-rose-50 flex items-center gap-2">
+    <section
+      className={`bg-white dark:bg-gray-900 rounded-2xl border border-rose-100 dark:border-gray-800 shadow-sm overflow-hidden ${className}`}
+    >
+      <div className="px-5 py-4 border-b border-rose-50 dark:border-gray-800 flex items-center gap-2">
         {Icon && <Icon className="w-4 h-4 text-rose-500 shrink-0" />}
-        <h2 className="font-semibold text-gray-900 text-sm">{title}</h2>
+        <h2 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{title}</h2>
       </div>
       <div className="p-5 space-y-4">{children}</div>
     </section>
@@ -65,8 +68,8 @@ function ToggleRow({ label, description, checked, onCheckedChange }) {
   return (
     <div className="flex items-start justify-between gap-4">
       <div>
-        <p className="text-sm font-medium text-gray-800">{label}</p>
-        {description && <p className="text-xs text-gray-500 mt-0.5">{description}</p>}
+        <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{label}</p>
+        {description && <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{description}</p>}
       </div>
       <Switch checked={checked} onCheckedChange={onCheckedChange} />
     </div>
@@ -103,7 +106,7 @@ export default function Settings() {
         setFlowerName(profile?.flower_name || getFlowerName(user) || '');
         const merged = mergePreferences(profile?.preferences || loadLocalPreferences(user.id));
         setPrefs(merged);
-        applyAppLanguage(merged.language);
+        setDocumentLanguage(merged.language);
       } catch (e) {
         console.error(e);
         setFullName(user.full_name || '');
@@ -143,15 +146,17 @@ export default function Settings() {
     }
   };
 
-  const savePreferences = async (nextPrefs) => {
+  const savePreferences = async (nextPrefs, { languageChanged = false } = {}) => {
     if (!user?.id) return;
     setPrefs(nextPrefs);
+    setDocumentLanguage(nextPrefs.language);
     try {
       await updateUserProfile(user.id, { preferences: nextPrefs });
-      applyAppLanguage(nextPrefs.language);
     } catch {
       saveLocalPreferences(user.id, nextPrefs);
-      applyAppLanguage(nextPrefs.language);
+    }
+    if (languageChanged) {
+      await applyAppLanguage(nextPrefs.language, { userInitiated: true });
     }
   };
 
@@ -201,34 +206,34 @@ export default function Settings() {
 
   if (loading) {
     return (
-      <div className="min-h-[calc(100dvh-3.5rem)] bg-rose-50/50 flex items-center justify-center">
+      <div className="min-h-[calc(100dvh-3.5rem)] bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-rose-400 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-[calc(100dvh-3.5rem)] bg-gradient-to-b from-rose-50/80 to-gray-50 py-8 px-4 pb-16">
+    <div className="min-h-[calc(100dvh-3.5rem)] bg-gray-50 dark:bg-gray-950 py-8 px-4 pb-16">
       <div className="max-w-lg mx-auto space-y-5">
         <div className="flex items-center justify-between gap-3">
-          <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-          <Link to="/" className="text-sm text-rose-600 hover:text-rose-700">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">Settings</h1>
+          <Link to="/" className="text-sm text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300">
             ← Home
           </Link>
         </div>
 
         {message && (
-          <p className="text-sm text-center bg-white border border-rose-200 text-rose-800 rounded-xl py-2 px-4">
+          <p className="text-sm text-center bg-white dark:bg-gray-900 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 rounded-xl py-2 px-4">
             {message}
           </p>
         )}
 
         {/* Header card */}
-        <div className="bg-white rounded-2xl border border-rose-100 shadow-sm p-5 flex items-center gap-4">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-rose-100 dark:border-gray-800 shadow-sm p-5 flex items-center gap-4">
           <UserAvatar user={user} size="lg" />
           <div className="min-w-0 flex-1">
-            <p className="font-semibold text-gray-900 truncate">{username}</p>
-            <p className="text-sm text-gray-500 truncate flex items-center gap-1">
+            <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">{username}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 truncate flex items-center gap-1">
               <Mail className="w-3.5 h-3.5 shrink-0" />
               {user.email}
             </p>
@@ -239,7 +244,7 @@ export default function Settings() {
         <SettingsSection title="Profile" icon={Sparkles}>
           <div className="space-y-3">
             <div>
-              <Label className="text-xs text-gray-500">Full name</Label>
+              <Label className="text-xs text-gray-500 dark:text-gray-400">Full name</Label>
               <Input
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
@@ -249,8 +254,8 @@ export default function Settings() {
             </div>
             <div>
               <Label className="text-xs text-gray-500">Email</Label>
-              <Input value={user.email || ''} disabled className="mt-1 rounded-xl bg-gray-50" />
-              <p className="text-[10px] text-gray-400 mt-1">Email is managed through your login account.</p>
+              <Input value={user.email || ''} disabled className="mt-1 rounded-xl bg-gray-50 dark:bg-gray-800" />
+              <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">Email is managed through your login account.</p>
             </div>
             <div>
               <Label className="text-xs text-gray-500">Phone number</Label>
@@ -299,9 +304,9 @@ export default function Settings() {
           <p className="text-xs text-gray-500 -mt-2">
             Your anonymous name in Forum and Mom Chat. Others do not see your real name.
           </p>
-          <div className="bg-rose-50 border border-rose-100 rounded-xl px-4 py-3 text-center">
-            <p className="text-xs text-rose-600 mb-1">Current flower name</p>
-            <p className="text-lg font-semibold text-rose-800">🌸 {flowerName || '—'}</p>
+          <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900 rounded-xl px-4 py-3 text-center">
+            <p className="text-xs text-rose-600 dark:text-rose-300 mb-1">Current flower name</p>
+            <p className="text-lg font-semibold text-rose-800 dark:text-rose-200">🌸 {flowerName || '—'}</p>
           </div>
           <div className="grid grid-cols-2 gap-2">
             {FLOWER_NAMES.map((name) => (
@@ -352,9 +357,9 @@ export default function Settings() {
         <SettingsSection
           title="Emergency support"
           icon={AlertTriangle}
-          className="border-red-200 ring-1 ring-red-100"
+          className="border-red-200 dark:border-red-900 ring-1 ring-red-100 dark:ring-red-950"
         >
-          <p className="text-xs text-red-700 bg-red-50 rounded-lg px-3 py-2 -mt-2">
+          <p className="text-xs text-red-700 dark:text-red-200 bg-red-50 dark:bg-red-950/40 rounded-lg px-3 py-2 -mt-2">
             If you or your baby may be in danger, call immediately or go to the nearest hospital.
           </p>
           <a href="tel:8044" className="block">
@@ -417,7 +422,9 @@ export default function Settings() {
           <Label className="text-xs text-gray-500">App language</Label>
           <Select
             value={prefs.language}
-            onValueChange={(code) => savePreferences({ ...prefs, language: code })}
+            onValueChange={(code) =>
+              savePreferences({ ...prefs, language: code }, { languageChanged: true })
+            }
           >
             <SelectTrigger className="rounded-xl mt-1">
               <SelectValue />
@@ -430,8 +437,8 @@ export default function Settings() {
               ))}
             </SelectContent>
           </Select>
-          <p className="text-[10px] text-gray-400">
-            Full translations for Amharic, Oromo, and Tigrinya are coming soon. Your choice is saved now.
+          <p className="text-[10px] text-gray-400 dark:text-gray-500">
+            Changes apply across the app. Switching back to English may refresh the page once.
           </p>
         </SettingsSection>
 
@@ -496,14 +503,44 @@ export default function Settings() {
           />
         </SettingsSection>
 
-        {/* About */}
-        <SettingsSection title="About" icon={Info}>
-          <div className="space-y-2 text-sm">
+        {/* About the app */}
+        <SettingsSection title="About Mama-Care" icon={Info}>
+          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+            Mama-Care is a private pregnancy support platform for Ethiopian mothers — AI guidance,
+            doctor booking, community chat, and trusted health articles in one safe place.
+          </p>
+
+          <div className="rounded-xl border border-rose-100 dark:border-gray-700 bg-rose-50/50 dark:bg-gray-800/50 p-4 space-y-2 text-sm">
+            <p className="font-semibold text-gray-900 dark:text-gray-100">Developer</p>
+            <p className="text-gray-700 dark:text-gray-300">Ephraim Tessema</p>
+            <a
+              href="mailto:ephraimtessema@gmail.com"
+              className="flex items-center gap-2 text-rose-600 dark:text-rose-400 hover:underline"
+            >
+              <Mail className="w-4 h-4 shrink-0" />
+              ephraimtessema@gmail.com
+            </a>
+            <a
+              href="tel:+251938126346"
+              className="flex items-center gap-2 text-rose-600 dark:text-rose-400 hover:underline"
+            >
+              <Phone className="w-4 h-4 shrink-0" />
+              +251 938 126 346
+            </a>
+            <p className="text-xs text-gray-500 dark:text-gray-400 pt-1">
+              Support email:{' '}
+              <a href="mailto:mamacareeth@gmail.com" className="text-rose-600 dark:text-rose-400 hover:underline">
+                mamacareeth@gmail.com
+              </a>
+            </p>
+          </div>
+
+          <div className="space-y-1 text-sm">
             <a
               href="https://github.com/ephraimtessema-lgtm/Mama-Care"
               target="_blank"
               rel="noopener noreferrer"
-              className="block py-2 text-rose-600 hover:underline"
+              className="block py-2 text-rose-600 dark:text-rose-400 hover:underline"
             >
               Terms of Service
             </a>
@@ -511,17 +548,16 @@ export default function Settings() {
               href="https://github.com/ephraimtessema-lgtm/Mama-Care"
               target="_blank"
               rel="noopener noreferrer"
-              className="block py-2 text-rose-600 hover:underline"
+              className="block py-2 text-rose-600 dark:text-rose-400 hover:underline"
             >
               Privacy Policy
             </a>
-            <a href="mailto:mamacareeth@gmail.com" className="block py-2 text-rose-600 hover:underline">
-              Contact support
-            </a>
-            <p className="text-xs text-gray-400 pt-2 border-t border-gray-100">
-              App version {packageJson.version || '0.0.0'}
-            </p>
           </div>
+
+          <p className="text-xs text-gray-400 dark:text-gray-500 pt-2 border-t border-gray-100 dark:border-gray-800 flex items-center justify-center gap-2">
+            App version {packageJson.version || '0.0.0'} · Made with ❤️ in
+            <EthiopiaFlag className="w-4 h-3" /> Ethiopia
+          </p>
         </SettingsSection>
 
         {/* Dashboard links + sign out */}

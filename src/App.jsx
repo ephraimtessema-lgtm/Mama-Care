@@ -100,7 +100,11 @@ const AppRoutes = () => {
 function App() {
   useEffect(() => {
     const saved = getSavedLanguage();
-    applyAppLanguage(saved);
+    if (saved && saved !== 'en') {
+      applyAppLanguage(saved);
+    } else {
+      document.documentElement.lang = 'en';
+    }
   }, []);
 
   return (
