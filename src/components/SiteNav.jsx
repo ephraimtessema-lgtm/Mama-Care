@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 import { Menu } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { isAdmin, isDoctor } from '@/lib/roles';
@@ -33,6 +34,33 @@ function authPath(path, isAuthenticated) {
   return `/login?redirect=${encodeURIComponent(path)}`;
 }
 
+function isNavLinkActive(pathname, to) {
+  if (to === '/doctors') {
+    return pathname === '/doctors' || pathname.startsWith('/book');
+  }
+  if (to === '/chat' || to === '/forum') {
+    return pathname === to;
+  }
+  return pathname === to || pathname.startsWith(`${to}/`);
+}
+
+function navLinkClasses(active, { mobile = false } = {}) {
+  if (mobile) {
+    return cn(
+      'block py-3 text-base border-b border-rose-50 dark:border-gray-800 last:border-0 transition-colors',
+      active
+        ? 'text-rose-500 dark:text-rose-400 font-semibold bg-rose-50/80 dark:bg-rose-950/30 -mx-2 px-2 rounded-lg border-b-0'
+        : 'text-gray-700 dark:text-gray-200 hover:text-rose-500 dark:hover:text-rose-400',
+    );
+  }
+  return cn(
+    'transition-colors whitespace-nowrap',
+    active
+      ? 'text-rose-500 dark:text-rose-400 font-semibold'
+      : 'text-gray-600 dark:text-gray-300 hover:text-rose-500 dark:hover:text-rose-400',
+  );
+}
+
 /** SheetClose only works inside the mobile Sheet — use this wrapper for menu links/buttons */
 function MenuWrap({ inSheet, children }) {
   if (inSheet) {
@@ -41,23 +69,27 @@ function MenuWrap({ inSheet, children }) {
   return children;
 }
 
-function NavLinks({ isAuthenticated, user, onNavigate, className = '' }) {
+function NavLinks({ isAuthenticated, user, onNavigate, className = '', pathname }) {
   const links = [...NAV_LINKS, ...roleNavLinks(user)];
   return (
     <ul className={className}>
-      {links.map(({ to, label }) => (
-        <li key={to}>
-          <MenuWrap inSheet={true}>
-            <Link
-              to={authPath(to, isAuthenticated)}
-              onClick={onNavigate}
-              className="block py-3 text-base text-gray-700 dark:text-gray-200 hover:text-rose-500 border-b border-rose-50 dark:border-gray-800 last:border-0 transition-colors"
-            >
-              {label}
-            </Link>
-          </MenuWrap>
-        </li>
-      ))}
+      {links.map(({ to, label }) => {
+        const active = isNavLinkActive(pathname, to);
+        return (
+          <li key={to}>
+            <MenuWrap inSheet={true}>
+              <Link
+                to={authPath(to, isAuthenticated)}
+                onClick={onNavigate}
+                className={navLinkClasses(active, { mobile: true })}
+                aria-current={active ? 'page' : undefined}
+              >
+                {label}
+              </Link>
+            </MenuWrap>
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -100,8 +132,10 @@ function AuthActions({ isAuthenticated, user, logout, mobile = false }) {
 
 export default function SiteNav() {
   const { user, isAuthenticated, logout, refreshUser } = useAuth();
+  const { pathname } = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const desktopLinks = [...NAV_LINKS, ...roleNavLinks(user)];
+  const homeActive = pathname === '/';
 
   useEffect(() => {
     if (isAuthenticated) refreshUser?.();
@@ -114,20 +148,33 @@ export default function SiteNav() {
           <span className="w-9 h-9 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center text-xl shadow-sm shadow-rose-200 shrink-0">
             🌸
           </span>
-          <span className="text-lg sm:text-xl font-bold text-rose-600 dark:text-rose-400 truncate">Mama-Care</span>
+          <span
+            className={cn(
+              'text-lg sm:text-xl font-bold truncate transition-colors',
+              homeActive
+                ? 'text-rose-500 dark:text-rose-400'
+                : 'text-rose-600 dark:text-rose-400 hover:text-rose-500',
+            )}
+          >
+            Mama-Care
+          </span>
         </Link>
 
         {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-6 text-sm text-gray-600 dark:text-gray-300">
-          {desktopLinks.map(({ to, label }) => (
-            <Link
-              key={to}
-              to={authPath(to, isAuthenticated)}
-              className="hover:text-rose-500 transition-colors whitespace-nowrap"
-            >
-              {label}
-            </Link>
-          ))}
+        <div className="hidden md:flex items-center gap-6 text-sm">
+          {desktopLinks.map(({ to, label }) => {
+            const active = isNavLinkActive(pathname, to);
+            return (
+              <Link
+                key={to}
+                to={authPath(to, isAuthenticated)}
+                className={navLinkClasses(active)}
+                aria-current={active ? 'page' : undefined}
+              >
+                {label}
+              </Link>
+            );
+          })}
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
@@ -162,6 +209,7 @@ export default function SiteNav() {
               <NavLinks
                 isAuthenticated={isAuthenticated}
                 user={user}
+                pathname={pathname}
                 onNavigate={() => setMenuOpen(false)}
               />
             </nav>
