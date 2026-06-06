@@ -133,25 +133,10 @@ export default function Settings() {
     setLocatingHospital(true);
     flash('Allow location access when your browser asks…');
 
-    // Open tab synchronously so popup blockers do not block maps after GPS resolves
-    let mapTab = null;
     try {
-      mapTab = window.open('about:blank', '_blank', 'noopener,noreferrer');
-    } catch {
-      mapTab = null;
-    }
-
-    try {
-      const { source } = await openNearestHospitalMaps(mapTab);
-      flash(`Opening hospitals near you (${source})…`);
+      const { source } = await openNearestHospitalMaps();
+      flash(`Opened hospitals near you in a new tab (${source}).`);
     } catch (e) {
-      if (mapTab && !mapTab.closed) {
-        try {
-          mapTab.close();
-        } catch {
-          /* ignore */
-        }
-      }
       flash(e?.message || 'Could not open maps with your location.');
     } finally {
       setLocatingHospital(false);

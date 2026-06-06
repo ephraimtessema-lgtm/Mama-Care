@@ -98,30 +98,26 @@ export async function resolveUserLocation() {
   throw lastError ?? new Error('Could not determine your location.');
 }
 
-function openUrl(url) {
-  // Same-tab navigation always works (no popup blocker)
-  window.location.assign(url);
+/** Open Maps in a new tab (no about:blank intermediate page). */
+function openInNewTab(url) {
+  const win = window.open(url, '_blank', 'noopener,noreferrer');
+  if (win) return true;
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  return true;
 }
 
-/**
- * Call synchronously from a click handler — keeps a tab ready before async GPS.
- * @param {Window|null} popup - window.open('', '_blank') from the click event
- */
-export async function openNearestHospitalMaps(popup = null) {
+export async function openNearestHospitalMaps() {
   const { lat, lng, source, accuracy } = await resolveUserLocation();
   const url = hospitalMapsUrl(lat, lng);
-
-  if (popup && !popup.closed) {
-    try {
-      popup.location.replace(url);
-      return { lat, lng, source, accuracy };
-    } catch {
-      /* fall through */
-    }
-  }
-
-  openUrl(url);
-  return { lat, lng, source, accuracy };
+  openInNewTab(url);
+  return { lat, lng, source, accuracy, url };
 }
 
 export { ETHIOPIA_CENTER };
