@@ -127,10 +127,28 @@
     color: rgb(156 163 175) !important;
   }
 
+  .dark .text-slate-900 {
+    color: rgb(243 244 246) !important;
+  }
+
+  .dark .text-slate-800 {
+    color: rgb(229 231 235) !important;
+  }
+
+  .dark .text-slate-600 {
+    color: rgb(209 213 219) !important;
+  }
+
+  .dark .text-slate-500,
+  .dark .text-slate-400 {
+    color: rgb(156 163 175) !important;
+  }
+
   .dark .border-gray-100,
   .dark .border-gray-200,
   .dark .border-rose-100,
-  .dark .border-rose-200 {
+  .dark .border-rose-200,
+  .dark .border-slate-200 {
     border-color: rgb(55 65 81) !important;
   }
 

@@ -6,7 +6,15 @@ import { Input } from '@/components/ui/input';
 import { signInWithPassword, signInWithGoogle, resetPasswordForEmail } from '@/api/auth';
 import { formatAuthError } from '@/lib/authErrors';
 import { useAuth } from '@/lib/AuthContext';
-import { AuthBrand, AuthShell, AuthDivider } from '@/components/auth/AuthShell';
+import {
+  AuthBrand,
+  AuthShell,
+  AuthDivider,
+  authLabelClass,
+  authInputClass,
+  authMutedClass,
+  authLinkClass,
+} from '@/components/auth/AuthShell';
 
 function GoogleIcon() {
   return (
@@ -43,6 +51,8 @@ export default function Login() {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+
+  const signupHref = `/signup${redirect !== '/' ? `?redirect=${encodeURIComponent(redirect)}` : ''}`;
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -115,7 +125,7 @@ export default function Login() {
       <Button
         type="button"
         variant="outline"
-        className="w-full h-11 rounded-xl border-slate-200 hover:bg-slate-50 font-medium"
+        className="w-full h-11 rounded-xl border-slate-200 dark:border-gray-600 hover:bg-slate-50 dark:hover:bg-gray-800 dark:text-gray-100 font-medium"
         onClick={handleGoogle}
         disabled={googleLoading || loading}
       >
@@ -127,11 +137,11 @@ export default function Login() {
 
       <form onSubmit={handleSignIn} className="space-y-4">
         <div>
-          <label htmlFor="email" className="text-sm font-semibold text-slate-800">
+          <label htmlFor="email" className={authLabelClass}>
             Email
           </label>
           <div className="relative mt-1.5">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-gray-500" />
             <Input
               id="email"
               type="email"
@@ -139,17 +149,17 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="pl-10 h-11 rounded-xl border-slate-200 focus-visible:ring-rose-400"
+              className={`pl-10 ${authInputClass}`}
             />
           </div>
         </div>
 
         <div>
-          <label htmlFor="password" className="text-sm font-semibold text-slate-800">
+          <label htmlFor="password" className={authLabelClass}>
             Password
           </label>
           <div className="relative mt-1.5">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-gray-500" />
             <Input
               id="password"
               type="password"
@@ -158,41 +168,49 @@ export default function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="pl-10 h-11 rounded-xl border-slate-200 focus-visible:ring-rose-400"
+              className={`pl-10 ${authInputClass}`}
             />
           </div>
         </div>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        {message && <p className="text-sm text-green-600">{message}</p>}
+        {error && (
+          <p className="text-sm text-red-600 dark:text-red-300 bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900 rounded-xl px-3 py-2">
+            {error}
+          </p>
+        )}
+        {message && (
+          <p className="text-sm text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-950/40 border border-green-100 dark:border-green-900 rounded-xl px-3 py-2">
+            {message}
+          </p>
+        )}
 
         <Button
           type="submit"
           disabled={loading}
-          className="w-full h-11 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold"
+          className="w-full h-11 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-rose-600 dark:hover:bg-rose-700 text-white font-semibold"
         >
           {loading ? 'Signing in…' : 'Sign in'}
         </Button>
       </form>
 
-      <div className="flex items-center justify-between mt-5 text-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-5 text-sm">
         <button
           type="button"
           onClick={handleForgotPassword}
-          className="text-slate-600 hover:text-rose-600 font-medium"
+          className="text-slate-600 dark:text-gray-300 hover:text-rose-600 dark:hover:text-rose-400 font-medium text-left"
         >
           Forgot password?
         </button>
-        <p className="text-slate-500">
+        <p className={authMutedClass}>
           Need an account?{' '}
-          <Link to={`/signup${redirect !== '/' ? `?redirect=${encodeURIComponent(redirect)}` : ''}`} className="font-semibold text-slate-900 hover:text-rose-600">
+          <Link to={signupHref} className={authLinkClass}>
             Sign up
           </Link>
         </p>
       </div>
 
       <p className="text-center mt-6">
-        <Link to="/" className="text-sm text-rose-500 hover:text-rose-600">
+        <Link to="/" className="text-sm text-rose-500 dark:text-rose-400 hover:text-rose-600 dark:hover:text-rose-300">
           ← Back to home
         </Link>
       </p>

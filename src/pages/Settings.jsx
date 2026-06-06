@@ -131,10 +131,27 @@ export default function Settings() {
 
   const findNearestHospital = async () => {
     setLocatingHospital(true);
+    flash('Allow location access when your browser asks…');
+
+    // Open tab synchronously so popup blockers do not block maps after GPS resolves
+    let mapTab = null;
     try {
-      await openNearestHospitalMaps();
-      flash('Opening hospitals near your current location…');
+      mapTab = window.open('about:blank', '_blank', 'noopener,noreferrer');
+    } catch {
+      mapTab = null;
+    }
+
+    try {
+      const { source } = await openNearestHospitalMaps(mapTab);
+      flash(`Opening hospitals near you (${source})…`);
     } catch (e) {
+      if (mapTab && !mapTab.closed) {
+        try {
+          mapTab.close();
+        } catch {
+          /* ignore */
+        }
+      }
       flash(e?.message || 'Could not open maps with your location.');
     } finally {
       setLocatingHospital(false);
@@ -402,8 +419,8 @@ export default function Settings() {
             )}
             {locatingHospital ? 'Getting your location…' : 'Find nearest hospital (maps)'}
           </Button>
-          <p className="text-[10px] text-gray-400 text-center">
-            Uses your device GPS — allow location when your browser asks.
+          <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center leading-relaxed">
+            Uses your device GPS (HTTPS required). Allow location when prompted. If GPS is off, we use an approximate network location.
           </p>
         </SettingsSection>
 

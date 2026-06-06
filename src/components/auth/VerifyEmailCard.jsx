@@ -2,7 +2,14 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { AuthBrand, AuthShell } from '@/components/auth/AuthShell';
+import {
+  AuthBrand,
+  AuthShell,
+  AuthError,
+  authLabelClass,
+  authInputClass,
+  authMutedClass,
+} from '@/components/auth/AuthShell';
 import { OTP_LENGTH } from '@/lib/otpConfig';
 
 export default function VerifyEmailCard({
@@ -30,7 +37,7 @@ export default function VerifyEmailCard({
         className="space-y-4"
       >
         <div>
-          <label htmlFor="otp" className="text-sm font-semibold text-slate-800">
+          <label htmlFor="otp" className={authLabelClass}>
             Verification code
           </label>
           <Input
@@ -42,15 +49,11 @@ export default function VerifyEmailCard({
             value={otp}
             onChange={(e) => onOtpChange(e.target.value.replace(/\D/g, '').slice(0, OTP_LENGTH))}
             disabled={loading}
-            className="mt-1.5 h-11 rounded-xl text-center text-lg tracking-[0.3em] font-mono"
+            className={`mt-1.5 text-center text-lg tracking-[0.3em] font-mono ${authInputClass}`}
           />
         </div>
 
-        {error && (
-          <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg py-2 px-3">
-            {error}
-          </p>
-        )}
+        {error && <AuthError>{error}</AuthError>}
 
         <Button
           type="submit"
@@ -61,24 +64,24 @@ export default function VerifyEmailCard({
         </Button>
       </form>
 
-      <p className="text-center text-sm text-slate-500 mt-4">
+      <p className={`text-center mt-4 ${authMutedClass}`}>
         Didn&apos;t get it?{' '}
         <button
           type="button"
           disabled={resendIn > 0 || loading}
           onClick={onResend}
-          className="text-rose-600 hover:text-rose-700 font-medium disabled:text-slate-400"
+          className="text-rose-600 dark:text-rose-400 hover:text-rose-700 font-medium disabled:text-slate-400 dark:disabled:text-gray-600"
         >
           {resendIn > 0 ? `Resend in ${resendIn}s` : 'Resend email'}
         </button>
       </p>
 
-      <p className="text-center text-sm text-slate-400 mt-2">
+      <p className="text-center text-sm text-slate-400 dark:text-gray-500 mt-2">
         Check your spam folder if you don&apos;t see the email.
       </p>
 
       <p className="text-center mt-6">
-        <Link to="/login" className="text-sm text-rose-500 hover:text-rose-600">
+        <Link to="/login" className="text-sm text-rose-500 dark:text-rose-400 hover:text-rose-600 dark:hover:text-rose-300">
           ← Back to sign in
         </Link>
       </p>

@@ -6,7 +6,17 @@ import { Input } from '@/components/ui/input';
 import { signUpWithPassword } from '@/api/auth';
 import { formatAuthError } from '@/lib/authErrors';
 import { validatePassword, PASSWORD_HINT } from '@/lib/password';
-import { AuthBrand, AuthShell } from '@/components/auth/AuthShell';
+import {
+  AuthBrand,
+  AuthShell,
+  AuthError,
+  authLabelClass,
+  authHintClass,
+  authInputClass,
+  authMutedClass,
+  authLinkClass,
+  authBackLinkClass,
+} from '@/components/auth/AuthShell';
 
 export default function Signup() {
   const [searchParams] = useSearchParams();
@@ -18,6 +28,8 @@ export default function Signup() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const loginHref = `/login${redirect !== '/' ? `?redirect=${encodeURIComponent(redirect)}` : ''}`;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -55,10 +67,7 @@ export default function Signup() {
 
   return (
     <AuthShell>
-      <Link
-        to={`/login${redirect !== '/' ? `?redirect=${encodeURIComponent(redirect)}` : ''}`}
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-rose-600 mb-4 -mt-2"
-      >
+      <Link to={loginHref} className={authBackLinkClass + ' mb-4 -mt-2'}>
         <ArrowLeft className="w-4 h-4" />
         Back to sign in
       </Link>
@@ -67,11 +76,11 @@ export default function Signup() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="email" className="text-sm font-semibold text-slate-800">
+          <label htmlFor="email" className={authLabelClass}>
             Email
           </label>
           <div className="relative mt-1.5">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-gray-500" />
             <Input
               id="email"
               type="email"
@@ -79,17 +88,17 @@ export default function Signup() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="pl-10 h-11 rounded-xl border-slate-200 focus-visible:ring-rose-400"
+              className={`pl-10 ${authInputClass}`}
             />
           </div>
         </div>
 
         <div>
-          <label htmlFor="password" className="text-sm font-semibold text-slate-800">
+          <label htmlFor="password" className={authLabelClass}>
             Password
           </label>
           <div className="relative mt-1.5">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-gray-500" />
             <Input
               id="password"
               type="password"
@@ -98,18 +107,18 @@ export default function Signup() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Min. 8 characters"
-              className="pl-10 h-11 rounded-xl border-slate-200 focus-visible:ring-rose-400"
+              className={`pl-10 ${authInputClass}`}
             />
           </div>
-          <p className="text-xs text-slate-500 mt-1.5">{PASSWORD_HINT}</p>
+          <p className={authHintClass}>{PASSWORD_HINT}</p>
         </div>
 
         <div>
-          <label htmlFor="confirmPassword" className="text-sm font-semibold text-slate-800">
+          <label htmlFor="confirmPassword" className={authLabelClass}>
             Confirm password
           </label>
           <div className="relative mt-1.5">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-gray-500" />
             <Input
               id="confirmPassword"
               type="password"
@@ -117,40 +126,34 @@ export default function Signup() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Re-enter password"
-              className="pl-10 h-11 rounded-xl border-slate-200 focus-visible:ring-rose-400"
+              className={`pl-10 ${authInputClass}`}
             />
           </div>
         </div>
 
         {error?.message && (
-          <div className="text-sm text-red-700 bg-red-50 border border-red-100 rounded-xl px-3 py-2.5">
+          <AuthError>
             <p>{error.message}</p>
             {error.showSignIn && (
-              <Link
-                to={`/login${redirect !== '/' ? `?redirect=${encodeURIComponent(redirect)}` : ''}`}
-                className="inline-block mt-2 font-semibold text-rose-600 hover:text-rose-700"
-              >
+              <Link to={loginHref} className="inline-block mt-2 font-semibold text-rose-600 dark:text-rose-400 hover:text-rose-700">
                 Sign in instead →
               </Link>
             )}
-          </div>
+          </AuthError>
         )}
 
         <Button
           type="submit"
           disabled={loading}
-          className="w-full h-11 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-semibold shadow-md shadow-rose-200/50"
+          className="w-full h-11 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-semibold shadow-md shadow-rose-200/50 dark:shadow-rose-900/30"
         >
           {loading ? 'Creating account…' : 'Create account'}
         </Button>
       </form>
 
-      <p className="text-center text-sm text-slate-500 mt-5">
+      <p className={`text-center mt-5 ${authMutedClass}`}>
         Already have an account?{' '}
-        <Link
-          to={`/login${redirect !== '/' ? `?redirect=${encodeURIComponent(redirect)}` : ''}`}
-          className="font-semibold text-slate-900 hover:text-rose-600"
-        >
+        <Link to={loginHref} className={authLinkClass}>
           Sign in
         </Link>
       </p>
