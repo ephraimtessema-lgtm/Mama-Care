@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { isAdmin, isDoctor } from '@/lib/roles';
 import UserProfileMenu from '@/components/UserProfileMenu';
 import ThemeToggle from '@/components/ThemeToggle';
+import NotificationBell from '@/components/NotificationBell';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -69,8 +70,12 @@ function MenuWrap({ inSheet, children }) {
   return children;
 }
 
-function NavLinks({ isAuthenticated, user, onNavigate, className = '', pathname }) {
-  const links = [...NAV_LINKS, ...roleNavLinks(user)];
+function NavLinks({ isAuthenticated, user, onNavigate, className = '', pathname, includeSettings = false }) {
+  const links = [
+    ...NAV_LINKS,
+    ...(includeSettings && isAuthenticated ? [{ to: '/settings', label: 'Settings' }] : []),
+    ...roleNavLinks(user),
+  ];
   return (
     <ul className={className}>
       {links.map(({ to, label }) => {
@@ -94,11 +99,11 @@ function NavLinks({ isAuthenticated, user, onNavigate, className = '', pathname 
   );
 }
 
-function AuthActions({ isAuthenticated, user, logout, mobile = false }) {
+function AuthActions({ isAuthenticated, user, logout, mobile = false, onNavigate }) {
   if (isAuthenticated && user) {
     return (
       <div className={mobile ? 'pt-4 border-t border-rose-100 flex justify-center' : 'shrink-0'}>
-        <UserProfileMenu user={user} onLogout={() => logout(false)} />
+        <UserProfileMenu user={user} onLogout={() => logout(false)} onNavigate={onNavigate} />
       </div>
     );
   }
@@ -141,6 +146,10 @@ export default function SiteNav() {
     if (isAuthenticated) refreshUser?.();
   }, [isAuthenticated, refreshUser]);
 
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-gray-950/90 backdrop-blur border-b border-rose-100 dark:border-gray-800">
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
@@ -179,6 +188,7 @@ export default function SiteNav() {
 
         <div className="flex items-center gap-1 shrink-0">
           <ThemeToggle />
+          {isAuthenticated && user && <NotificationBell />}
 
           {/* Desktop auth */}
           <div className="hidden md:block">
@@ -210,6 +220,7 @@ export default function SiteNav() {
                 isAuthenticated={isAuthenticated}
                 user={user}
                 pathname={pathname}
+                includeSettings
                 onNavigate={() => setMenuOpen(false)}
               />
             </nav>
@@ -217,6 +228,7 @@ export default function SiteNav() {
               <AuthActions
                 isAuthenticated={isAuthenticated}
                 user={user}
+                onNavigate={() => setMenuOpen(false)}
                 logout={() => {
                   setMenuOpen(false);
                   logout(false);

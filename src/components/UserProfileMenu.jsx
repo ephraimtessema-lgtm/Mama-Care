@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-export default function UserProfileMenu({ user, onLogout }) {
+export default function UserProfileMenu({ user, onLogout, onNavigate }) {
   const username = getUsername(user);
   const flowerName = getFlowerName(user);
 
@@ -47,7 +47,7 @@ export default function UserProfileMenu({ user, onLogout }) {
         <DropdownMenuSeparator />
         {isAdmin(user) && (
           <DropdownMenuItem asChild>
-            <Link to="/admin" className="cursor-pointer gap-2">
+            <Link to="/admin" className="cursor-pointer gap-2" onClick={() => onNavigate?.()}>
               <Shield className="w-4 h-4" />
               Admin dashboard
             </Link>
@@ -55,14 +55,14 @@ export default function UserProfileMenu({ user, onLogout }) {
         )}
         {isDoctor(user) && (
           <DropdownMenuItem asChild>
-            <Link to="/doctor" className="cursor-pointer gap-2">
+            <Link to="/doctor" className="cursor-pointer gap-2" onClick={() => onNavigate?.()}>
               <Stethoscope className="w-4 h-4" />
               Doctor dashboard
             </Link>
           </DropdownMenuItem>
         )}
         <DropdownMenuItem asChild>
-          <Link to="/settings" className="cursor-pointer gap-2">
+          <Link to="/settings" className="cursor-pointer gap-2" onClick={() => onNavigate?.()}>
             <Settings className="w-4 h-4" />
             Settings
           </Link>

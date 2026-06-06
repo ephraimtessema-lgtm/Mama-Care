@@ -49,6 +49,7 @@ import {
 } from 'lucide-react';
 import packageJson from '../../package.json';
 import EthiopiaFlag from '@/components/EthiopiaFlag';
+import { openNearestHospitalMaps } from '@/lib/nearestHospital';
 
 function SettingsSection({ title, icon: Icon, children, className = '' }) {
   return (
@@ -82,6 +83,7 @@ export default function Settings() {
   const [saving, setSaving] = useState(false);
   const [flowerSaving, setFlowerSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [locatingHospital, setLocatingHospital] = useState(false);
 
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
@@ -125,6 +127,18 @@ export default function Settings() {
   const flash = (text) => {
     setMessage(text);
     setTimeout(() => setMessage(''), 3500);
+  };
+
+  const findNearestHospital = async () => {
+    setLocatingHospital(true);
+    try {
+      await openNearestHospitalMaps();
+      flash('Opening hospitals near your current location…');
+    } catch (e) {
+      flash(e?.message || 'Could not open maps with your location.');
+    } finally {
+      setLocatingHospital(false);
+    }
   };
 
   const saveProfile = async () => {
@@ -374,17 +388,23 @@ export default function Settings() {
               Emergency warning signs (library)
             </Button>
           </Link>
-          <a
-            href="https://www.google.com/maps/search/hospital+near+me"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block"
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full rounded-xl gap-2"
+            disabled={locatingHospital}
+            onClick={findNearestHospital}
           >
-            <Button variant="outline" className="w-full rounded-xl gap-2">
+            {locatingHospital ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
               <MapPin className="w-4 h-4" />
-              Find nearest hospital (maps)
-            </Button>
-          </a>
+            )}
+            {locatingHospital ? 'Getting your location…' : 'Find nearest hospital (maps)'}
+          </Button>
+          <p className="text-[10px] text-gray-400 text-center">
+            Uses your device GPS — allow location when your browser asks.
+          </p>
         </SettingsSection>
 
         {/* Notifications */}
@@ -413,7 +433,7 @@ export default function Settings() {
             onCheckedChange={(v) => updateNotif('weeklyBabyGrowth', v)}
           />
           <p className="text-[10px] text-gray-400">
-            Email and push delivery will use these preferences when we enable them.
+            Controls in-app notifications (bell icon). Appointment, chat, and forum alerts appear there.
           </p>
         </SettingsSection>
 

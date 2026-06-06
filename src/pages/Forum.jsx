@@ -10,6 +10,7 @@ import {
   deleteForumPost,
   deleteForumReply,
 } from "@/api/forum";
+import { notifyForumReply } from "@/api/notifications";
 import { adminSetUserBans } from "@/api/moderation";
 import HoverDeleteButton from "@/components/HoverDeleteButton";
 import { Button } from "@/components/ui/button";
@@ -151,14 +152,15 @@ export default function Forum() {
         timestamp: new Date().toISOString(),
       };
       await ForumPost.update(post.id, { replies: [...(post.replies || []), newReply] });
-      return { postId: post.id, newReply };
+      return { postId: post.id, newReply, preview: replyText };
     },
-    onSuccess: ({ postId, newReply }) => {
+    onSuccess: async ({ postId, newReply, preview }) => {
       queryClient.invalidateQueries({ queryKey: ["forum_posts"] });
       setReplyText("");
       setSelectedPost((prev) =>
         prev?.id === postId ? { ...prev, replies: [...(prev.replies || []), newReply] } : prev,
       );
+      notifyForumReply(postId, preview).catch(() => {});
     },
   });
 
